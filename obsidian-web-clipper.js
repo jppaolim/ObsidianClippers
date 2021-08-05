@@ -3,6 +3,28 @@ javascript: Promise.all([import('https://unpkg.com/turndown@6.0.0?module'), impo
 }, {
     default: Readability
 }]) => {
+
+    function getSelectionHtml() {
+        var html = "";
+        if (typeof window.getSelection != "undefined") {
+            var sel = window.getSelection();
+            if (sel.rangeCount) {
+                var container = document.createElement("div");
+                for (var i = 0, len = sel.rangeCount; i < len; ++i) {
+                    container.appendChild(sel.getRangeAt(i).cloneContents());
+                }
+                html = container.innerHTML;
+            }
+        } else if (typeof document.selection != "undefined") {
+            if (document.selection.type == "Text") {
+                html = document.selection.createRange().htmlText;
+            }
+        }
+        return html;
+    }
+
+    const selection = getSelectionHtml();
+
     const {
         title,
         byline,
@@ -11,13 +33,19 @@ javascript: Promise.all([import('https://unpkg.com/turndown@6.0.0?module'), impo
 
     const titleUri = title.replace(':', '').replace(/\//g, '-').replace(/\\/g, '-');
 
+    if (selection) {
+        var markdownify = selection;
+    } else {
+        var markdownify = content;
+    }
+
     const markdown = new Turndown({
         headingStyle: 'atx',
         hr: '---',
         bulletListMarker: '-',
         codeBlockStyle: 'fenced',
         emDelimiter: '*',
-    }).turndown(content);
+    }).turndown(markdownify);
 
     var date = new Date();
 
