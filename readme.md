@@ -1,4 +1,4 @@
-By @kepano
+By [@kepano](https://www.twitter.com/kepano)
 
 You can find a demo of this bookmarklet [on YouTube](https://www.youtube.com/watch?v=Vy1MdjickAI)
 
