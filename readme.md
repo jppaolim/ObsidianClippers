@@ -14,4 +14,4 @@ You can customize the output using the optional variables at the top, and the te
 
 ### Disclaimer
 
-Note that this bookmarklet may not work on all websites. If you run into issues, you can also try the [MarkDownload browser extension](https://forum.obsidian.md/t/markdownload-markdown-web-clipper/173) which provides similar functionality.
+This bookmarklet may not work on all websites. If you run into issues, you can also try the [MarkDownload browser extension](https://forum.obsidian.md/t/markdownload-markdown-web-clipper/173) which provides similar functionality.
