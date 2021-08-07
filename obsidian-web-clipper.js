@@ -61,7 +61,7 @@ javascript: Promise.all([import('https://unpkg.com/turndown@6.0.0?module'), impo
   }
 
   if (vault) {
-      var vaultName = `&vault=${vault}`
+      var vaultName = '&vault=' + encodeURIComponent(`${vault}`);
   } else {
       var vaultName = '';
   }
@@ -96,7 +96,7 @@ javascript: Promise.all([import('https://unpkg.com/turndown@6.0.0?module'), impo
       + markdownBody ;
   
   document.location.href = "obsidian://new?"
-    + "name=" + folder + fileName
+    + "name=" + encodeURIComponent(folder + fileName)
     + "&content=" + encodeURIComponent(fileContent)
     + vaultName ;
 })
