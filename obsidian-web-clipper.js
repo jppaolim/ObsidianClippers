@@ -96,7 +96,7 @@ javascript: Promise.all([import('https://unpkg.com/turndown@6.0.0?module'), impo
       + markdownBody ;
   
   document.location.href = "obsidian://new?"
-    + "name=" + encodeURIComponent(folder + fileName)
+    + "file=" + encodeURIComponent(folder + fileName)
     + "&content=" + encodeURIComponent(fileContent)
     + vaultName ;
 })
