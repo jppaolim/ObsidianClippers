@@ -15,4 +15,4 @@ By default, clicking the bookmarklet creates a new Obsidian file from the main b
 
 ### Troubleshooting
 
-This bookmarklet may not work on all websites. If you run into issues, you can also try the [MarkDownload browser extension](https://forum.obsidian.md/t/markdownload-markdown-web-clipper/173) which provides similar functionality. You can also troubleshoot issues by opening the Developer Console in your browser and checking if any errors appear when you click the bookmarklet. The most common error is that a website or the browser itself is blocking third party code execution. Unfortunately there is no good solve for that yet.
+This bookmarklet may not work on all websites. If you run into issues, you can also try the [MarkDownload browser extension](https://forum.obsidian.md/t/markdownload-markdown-web-clipper/173) which provides similar functionality. You can troubleshoot issues by opening the Developer Console in your browser and checking if any errors appear when you click the bookmarklet. The most common error is that a website or the browser itself is blocking third party code execution. Unfortunately there is no good solve for that yet.
