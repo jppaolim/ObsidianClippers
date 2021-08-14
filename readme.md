@@ -13,6 +13,6 @@ You can customize the output using the optional variables at the top, and the te
 ### Usage
 By default, clicking the bookmarklet creates a new Obsidian file from the main body of the article (similar to Readability view). Alternatively you can choose to create a file from a selection, by either selecting all (`CMD+A`), or just a portion of the page.
 
-### Disclaimer
+### Troubleshooting
 
-This bookmarklet may not work on all websites. If you run into issues, you can also try the [MarkDownload browser extension](https://forum.obsidian.md/t/markdownload-markdown-web-clipper/173) which provides similar functionality.
+This bookmarklet may not work on all websites. If you run into issues, you can also try the [MarkDownload browser extension](https://forum.obsidian.md/t/markdownload-markdown-web-clipper/173) which provides similar functionality. You can also troubleshoot issues by opening the Developer Console in your browser and checking if any errors appear when you click the bookmarklet. The most common error is that a website or the browser itself is blocking third party code execution. Unfortunately there is no good solve for that yet.
