@@ -8,7 +8,7 @@ javascript: Promise.all([import('https://unpkg.com/turndown@6.0.0?module'), impo
   const vault = "";
 
   /* Optional folder name such as "Clippings/" */
-  const folder = "";
+  const folder = "Clippings/";
 
   /* Optional tags  */
   let tags = "clippings";
@@ -142,23 +142,14 @@ javascript: Promise.all([import('https://unpkg.com/turndown@6.0.0?module'), impo
       + 'source: ' + document.URL + '\n'
       + 'clipped: ' + today + '\n'
       + 'published: ' + published + '\n' 
+      + 'topics: \n'
       + 'tags: [' + tags + ']\n'
       + '---\n\n'
       + markdownBody ;
 
-  /* assemble URL, decrementing each time, until it does not exceed the max URL length for this browser, supposedly 2048 but allow for a little error with 2030 */
-  contentLength = 2048;
-  maxURLLength = 2030;
-  decrement = 1;
-
-  do {
-  hrefString = 'obsidian://new?'
-      + 'file=' + encodeURIComponent(folder + fileName)
-      + '&content=' + encodeURIComponent(fileContent.substr(0,contentLength-1))
-      + vaultName ;
-  contentLength = contentLength - decrement;
-  } while (hrefString.length > maxURLLength);
-
-  document.location.href = hrefString;
+   document.location.href = "obsidian://new?"
+    + "file=" + encodeURIComponent(folder + fileName)
+    + "&content=" + encodeURIComponent(fileContent)
+    + vaultName ;
 
 })
