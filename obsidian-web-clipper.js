@@ -115,14 +115,33 @@ javascript: Promise.all([import('https://unpkg.com/turndown@6.0.0?module'), impo
       authorBrackets = '"[[ ' + siteName + ' ]]"';
   }
 
+  /* Try to get published date */
+  var timeElement = document.querySelector("time");
+  var publishedDate = timeElement ? timeElement.getAttribute("datetime") : "";
+
+  if (publishedDate && publishedDate.trim() !== "") {
+      var date = new Date(publishedDate);
+      var year = date.getFullYear();
+      var month = date.getMonth() + 1; // Months are 0-based in JavaScript
+      var day = date.getDate();
+
+      // Pad month and day with leading zeros if necessary
+      month = month < 10 ? '0' + month : month;
+      day = day < 10 ? '0' + day : day;
+
+      var published = year + '-' + month + '-' + day;
+  } else {
+      var published = ''
+  }
+
   /* YAML front matter as tags render cleaner with special chars  */
   const fileContent = 
       '---\n'
       + 'author: ' + authorBrackets + '\n'
-      + 'title: ' + title + '\n'
+      + 'title: "' + title + '"\n'
       + 'source: ' + document.URL + '\n'
       + 'clipped: ' + today + '\n'
-      + 'published: \n' 
+      + 'published: ' + published + '\n' 
       + 'tags: [' + tags + ']\n'
       + '---\n\n'
       + markdownBody ;
