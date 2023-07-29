@@ -11,7 +11,17 @@ javascript: Promise.all([import('https://unpkg.com/turndown@6.0.0?module'), impo
   const folder = "";
 
   /* Optional tags  */
-  const tags = "#clippings";
+  let tags = "clippings";
+
+  /* Parse the site's meta keywords content into tags, if present */
+  if (document.querySelector('meta[name="keywords" i]')) {
+      var keywords = document.querySelector('meta[name="keywords" i]').getAttribute('content').split(',');
+
+      keywords.forEach(function(keyword) {
+          let tag = ' ' + keyword.split(' ').join('');
+          tags += tag;
+      });
+  }
 
   function getSelectionHtml() {
     var html = "";
@@ -87,16 +97,49 @@ javascript: Promise.all([import('https://unpkg.com/turndown@6.0.0?module'), impo
 
   const today = convertDate(date);
 
+  /* Fetch the meta author */
+  var metaAuthorElement = document.querySelector("meta[name='author']");
+  var metaAuthor = metaAuthorElement ? metaAuthorElement.getAttribute("content") : "";
+
+  /* Fetch site name as backup */
+  var metaSiteNameElement = document.querySelector("meta[name='og:site_name']");
+  var siteName = metaSiteNameElement ? metaSiteNameElement.getAttribute("content") : "";
+
+  /* Check if there's an author and add brackets */
+  var authorBrackets = "";
+  if (byline && byline.trim() !== "") {
+      authorBrackets = '"[[ ' + byline + ' ]]"';
+  } else if (metaAuthor && metaAuthor.trim() !== "") {
+      authorBrackets = '"[[ ' + metaAuthor + ' ]]"';
+  } else if (siteName && siteName.trim() !== "") {
+      authorBrackets = '"[[ ' + siteName + ' ]]"';
+  }
+
+  /* YAML front matter as tags render cleaner with special chars  */
   const fileContent = 
-      "author:: " + byline + "\n"
-      + "source:: [" + title + "](" + document.URL + ")\n"
-      + "clipped:: [[" + today + "]]\n"
-      + "published:: \n\n" 
-      + tags + "\n\n"
+      '---\n'
+      + 'author: ' + authorBrackets + '\n'
+      + 'title: ' + title + '\n'
+      + 'source: ' + document.URL + '\n'
+      + 'clipped: ' + today + '\n'
+      + 'published: \n' 
+      + 'tags: [' + tags + ']\n'
+      + '---\n\n'
       + markdownBody ;
-  
-  document.location.href = "obsidian://new?"
-    + "file=" + encodeURIComponent(folder + fileName)
-    + "&content=" + encodeURIComponent(fileContent)
-    + vaultName ;
+
+  /* assemble URL, decrementing each time, until it does not exceed the max URL length for this browser, supposedly 2048 but allow for a little error with 2030 */
+  contentLength = 2048;
+  maxURLLength = 2030;
+  decrement = 1;
+
+  do {
+  hrefString = 'obsidian://new?'
+      + 'file=' + encodeURIComponent(folder + fileName)
+      + '&content=' + encodeURIComponent(fileContent.substr(0,contentLength-1))
+      + vaultName ;
+  contentLength = contentLength - decrement;
+  } while (hrefString.length > maxURLLength);
+
+  document.location.href = hrefString;
+
 })
