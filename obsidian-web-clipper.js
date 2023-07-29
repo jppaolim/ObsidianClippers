@@ -102,17 +102,17 @@ javascript: Promise.all([import('https://unpkg.com/turndown@6.0.0?module'), impo
   var metaAuthor = metaAuthorElement ? metaAuthorElement.getAttribute("content") : "";
 
   /* Fetch site name as backup */
-  var metaSiteNameElement = document.querySelector("meta[name='og:site_name']");
+  var metaSiteNameElement = document.querySelector("meta[property='og:site_name']");
   var siteName = metaSiteNameElement ? metaSiteNameElement.getAttribute("content") : "";
 
   /* Check if there's an author and add brackets */
   var authorBrackets = "";
   if (byline && byline.trim() !== "") {
-      authorBrackets = '"[[ ' + byline + ' ]]"';
+      authorBrackets = '"[[' + byline + ']]"';
   } else if (metaAuthor && metaAuthor.trim() !== "") {
-      authorBrackets = '"[[ ' + metaAuthor + ' ]]"';
+      authorBrackets = '"[[' + metaAuthor + ']]"';
   } else if (siteName && siteName.trim() !== "") {
-      authorBrackets = '"[[ ' + siteName + ' ]]"';
+      authorBrackets = '"[[' + siteName + ']]"';
   }
 
   /* Try to get published date */
