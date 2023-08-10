@@ -97,23 +97,18 @@ javascript: Promise.all([import('https://unpkg.com/turndown@6.0.0?module'), impo
 
   const today = convertDate(date);
 
-  /* Fetch the meta author */
-  var metaAuthorElement = document.querySelector("meta[name='author']");
-  var metaAuthor = metaAuthorElement ? metaAuthorElement.getAttribute("content") : "";
-
-  /* Fetch site name as backup */
-  var metaSiteNameElement = document.querySelector("meta[property='og:site_name']");
-  var siteName = metaSiteNameElement ? metaSiteNameElement.getAttribute("content") : "";
-
-  /* Check if there's an author and add brackets */
-  var authorBrackets = "";
-  if (byline && byline.trim() !== "") {
-      authorBrackets = '"[[' + byline + ']]"';
-  } else if (metaAuthor && metaAuthor.trim() !== "") {
-      authorBrackets = '"[[' + metaAuthor + ']]"';
-  } else if (siteName && siteName.trim() !== "") {
-      authorBrackets = '"[[' + siteName + ']]"';
+  // Utility function to get meta content by name or property
+  function getMetaContent(attr, value) {
+      var element = document.querySelector(`meta[${attr}='${value}']`);
+      return element ? element.getAttribute("content").trim() : "";
   }
+
+  // Fetch byline, meta author, property author, or site name
+  var author = byline || getMetaContent("name", "author") || getMetaContent("property", "author") || getMetaContent("property", "og:site_name");
+
+  // Check if there's an author and add brackets
+  var authorBrackets = author ? `"[[${author}]]"` : "";
+
 
   /* Try to get published date */
   var timeElement = document.querySelector("time");
@@ -137,6 +132,7 @@ javascript: Promise.all([import('https://unpkg.com/turndown@6.0.0?module'), impo
   /* YAML front matter as tags render cleaner with special chars  */
   const fileContent = 
       '---\n'
+      + 'category: "[[Clippings]]"\n'
       + 'author: ' + authorBrackets + '\n'
       + 'title: "' + title + '"\n'
       + 'source: ' + document.URL + '\n'
