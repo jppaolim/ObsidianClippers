@@ -1,27 +1,33 @@
-javascript: Promise.all([import('https://unpkg.com/turndown@6.0.0?module'), import('https://unpkg.com/@tehshrike/readability@0.2.0'), ]).then(async ([{
-    default: Turndown
-}, {
-    default: Readability
-}]) => {
+javascript: (async () => {
+    const [{ default: Turndown }, readabilityModule] = await Promise.all([
+        import('https://unpkg.com/turndown?module'),
+        import('https://cdn.skypack.dev/@mozilla/readability')
+    ]);
+
+    const Readability = readabilityModule.Readability;
+
 
   /* Optional vault name */
-  const vault = "";
+  const vault = "Main";
 
   /* Optional folder name such as "Clippings/" */
-  const folder = "Clippings/";
+  const folder = "Ressources/";
 
-  /* Optional tags  */
-  let tags = "clippings";
+  /* Optional tags */
+  var tagLines = ['tags:'];
+  tagLines.push('  - AI');  // The initial "AI" tag
 
   /* Parse the site's meta keywords content into tags, if present */
   if (document.querySelector('meta[name="keywords" i]')) {
-      var keywords = document.querySelector('meta[name="keywords" i]').getAttribute('content').split(',');
+    var keywords = document.querySelector('meta[name="keywords" i]').getAttribute('content').split(',');
 
-      keywords.forEach(function(keyword) {
-          let tag = ' ' + keyword.split(' ').join('');
-          tags += tag;
-      });
+    keywords.forEach(function(keyword) {
+      let tag = keyword.trim();  // Remove extra spaces from each keyword
+      tagLines.push('  - ' + tag);  // Add each keyword as a new list item
+    });
   }
+
+  const tagsYAML = tagLines.join('\n');  // Join each line into a single string
 
   function getSelectionHtml() {
     var html = "";
@@ -50,19 +56,23 @@ javascript: Promise.all([import('https://unpkg.com/turndown@6.0.0?module'), impo
       content
   } = new Readability(document.cloneNode(true)).parse();
 
-  function getFileName(fileName) {
-    var userAgent = window.navigator.userAgent,
-        platform = window.navigator.platform,
-        windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'];
-
-    if (windowsPlatforms.indexOf(platform) !== -1) {
-      fileName = fileName.replace(':', '').replace(/[/\\?%*|"<>]/g, '-');
-    } else {
-      fileName = fileName.replace(':', '').replace(/\//g, '-').replace(/\\/g, '-');
-    }
-    return fileName;
+  function sanitizeYAMLstring(str) {
+    return str.replace(/["'“”‘’]/g, '');
   }
-  const fileName = getFileName(title);
+  const sanitizedTitle = sanitizeYAMLstring(title);
+
+
+  function getFileName(fileName) {
+    const invalidChars = /[:/\\?%*|"<>]/g;
+   
+   fileName = fileName.replace(invalidChars, ' - ');
+   fileName = fileName.replace(/\s+/g, ' ').trim();
+   
+   return fileName;
+ }
+ 
+ 
+  const fileName = getFileName(sanitizedTitle);
 
   if (selection) {
       var markdownify = selection;
@@ -109,38 +119,24 @@ javascript: Promise.all([import('https://unpkg.com/turndown@6.0.0?module'), impo
   // Check if there's an author and add brackets
   var authorBrackets = author ? `"[[${author}]]"` : "";
 
-
-  /* Try to get published date */
-  var timeElement = document.querySelector("time");
-  var publishedDate = timeElement ? timeElement.getAttribute("datetime") : "";
-
-  if (publishedDate && publishedDate.trim() !== "") {
-      var date = new Date(publishedDate);
-      var year = date.getFullYear();
-      var month = date.getMonth() + 1; // Months are 0-based in JavaScript
-      var day = date.getDate();
-
-      // Pad month and day with leading zeros if necessary
-      month = month < 10 ? '0' + month : month;
-      day = day < 10 ? '0' + day : day;
-
-      var published = year + '-' + month + '-' + day;
-  } else {
-      var published = ''
-  }
+  // Get descriptino 
+  var desc = getMetaContent("name", "description") || getMetaContent("property", "description") ||  getMetaContent("property", "og:description"); ; 
+  const sanitizedDesc = sanitizeYAMLstring(desc)
 
   /* YAML front matter as tags render cleaner with special chars  */
   const fileContent = 
       '---\n'
       + 'category: "[[Clippings]]"\n'
       + 'author: ' + authorBrackets + '\n'
-      + 'title: "' + title + '"\n'
+      + 'title: "' + sanitizedTitle + '"\n'
       + 'source: ' + document.URL + '\n'
       + 'clipped: ' + today + '\n'
-      + 'published: ' + published + '\n' 
-      + 'topics: \n'
-      + 'tags: [' + tags + ']\n'
+      + 'description: "' + sanitizedDesc + '"\n'
+      + 'summary: "' + '"\n'
+      + tagsYAML + '\n'  // Include the tags in the new format
+      + "publish: false\n"
       + '---\n\n'
+      + "# "+ title +'"\n'
       + markdownBody ;
 
    document.location.href = "obsidian://new?"
@@ -148,4 +144,4 @@ javascript: Promise.all([import('https://unpkg.com/turndown@6.0.0?module'), impo
     + "&content=" + encodeURIComponent(fileContent)
     + vaultName ;
 
-})
+})();
