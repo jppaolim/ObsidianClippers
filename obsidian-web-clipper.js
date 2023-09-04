@@ -71,6 +71,10 @@ javascript: (async () => {
    return fileName;
  }
  
+ function fixMarkdownLinks(text) {
+    const regex = /\[\s*\n*!\[\](?:\()([^\)]+)(?:\))\s*\n*\]\(([^)]+)\)/g;
+    return text.replace(regex, "[![]($1)]($2)");
+  }
  
   const fileName = getFileName(sanitizedTitle);
 
@@ -86,13 +90,15 @@ javascript: (async () => {
       var vaultName = '';
   }
 
-  const markdownBody = new Turndown({
+  const markdownBodyTemp = new Turndown({
       headingStyle: 'atx',
       hr: '---',
       bulletListMarker: '-',
       codeBlockStyle: 'fenced',
       emDelimiter: '*',
   }).turndown(markdownify);
+
+  const markdownBody = fixMarkdownLinks(markdownBodyTemp);
 
   var date = new Date();
 
@@ -145,3 +151,8 @@ javascript: (async () => {
     + vaultName ;
 
 })();
+
+
+
+
+  
