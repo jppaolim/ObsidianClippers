@@ -17,13 +17,13 @@ javascript: (async () => {
   var tagLines = ['tags:'];
   tagLines.push('  - AI');  // The initial "AI" tag
 
-  /* Parse the site's meta keywords content into tags, if present */
+  /* Parse the site's meta keywords content into tags, if present --> from experience it's not so interesting so commenting it*/
   if (document.querySelector('meta[name="keywords" i]')) {
     var keywords = document.querySelector('meta[name="keywords" i]').getAttribute('content').split(',');
 
     keywords.forEach(function(keyword) {
       let tag = keyword.trim();  // Remove extra spaces from each keyword
-      tagLines.push('  - ' + tag);  // Add each keyword as a new list item
+      //tagLines.push('  - ' + tag);  // Add each keyword as a new list item
     });
   }
 
