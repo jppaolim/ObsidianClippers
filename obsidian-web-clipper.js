@@ -17,7 +17,7 @@ javascript: (async () => {
   var tagLines = ['tags:'];
   tagLines.push('  - AI');  // The initial "AI" tag
 
-  /* Parse the site's meta keywords content into tags, if present --> from experience it's not so interesting so commenting it*/
+  /* Parse the site's meta keywords content into tags, if present --> from experience it's not so interesting so commenting*/
   if (document.querySelector('meta[name="keywords" i]')) {
     var keywords = document.querySelector('meta[name="keywords" i]').getAttribute('content').split(',');
 
