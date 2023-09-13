@@ -11,7 +11,7 @@ javascript: (async () => {
   const vault = "Main";
 
   /* Optional folder name such as "Clippings/" */
-  const folder = "Ressources/";
+  const folder = "Inbox/Capture";
 
   /* Optional tags */
   var tagLines = ['tags:'];
@@ -22,8 +22,8 @@ javascript: (async () => {
     var keywords = document.querySelector('meta[name="keywords" i]').getAttribute('content').split(',');
 
     keywords.forEach(function(keyword) {
-      let tag = keyword.trim();  // Remove extra spaces from each keyword
-      //tagLines.push('  - ' + tag);  // Add each keyword as a new list item
+      let tag = keyword.trim();  
+      //tagLines.push('  - ' + tag);  // Add each keyword as a new list item uncomment if you want to capture them.
     });
   }
 
@@ -142,7 +142,7 @@ javascript: (async () => {
       + tagsYAML + '\n'  // Include the tags in the new format
       + "publish: false\n"
       + '---\n\n'
-      + "# "+ title +'"\n'
+      + "# "+ fileName +'"\n'
       + markdownBody ;
 
    document.location.href = "obsidian://new?"
@@ -151,8 +151,3 @@ javascript: (async () => {
     + vaultName ;
 
 })();
-
-
-
-
-  
