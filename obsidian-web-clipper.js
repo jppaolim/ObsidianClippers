@@ -11,7 +11,7 @@ javascript: (async () => {
   const vault = "Main";
 
   /* Optional folder name such as "Clippings/" */
-  const folder = "Inbox/Capture";
+  const folder = "Inbox/Capture/";
 
   /* Optional tags */
   var tagLines = ['tags:'];
