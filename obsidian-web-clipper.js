@@ -6,16 +6,58 @@ javascript: (async () => {
 
     const Readability = readabilityModule.Readability;
 
+    // UUID Generation function
+    function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0,
+            v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+    }
+
+    // Function to extract and parse publication date
+    function getPublicationDate() {
+        // Try different meta tags that might contain the publication date
+        const dateSelectors = [
+            'meta[property="article:published_time"]',
+            'meta[name="publication-date"]',
+            'meta[name="date"]',
+            'meta[property="og:published_time"]',
+            'time[datetime]',
+            'meta[name="publish-date"]'
+        ];
+
+        for (const selector of dateSelectors) {
+            const element = document.querySelector(selector);
+            if (element) {
+                const dateStr = element.getAttribute('content') || element.getAttribute('datetime');
+                if (dateStr) {
+                    try {
+                        const date = new Date(dateStr);
+                        if (!isNaN(date.getTime())) {
+                            return convertDate(date);
+                        }
+                    } catch (e) {
+                        console.log('Error parsing date:', e);
+                    }
+                }
+            }
+        }
+
+    // Return today's date if no publication date found
+    return convertDate(new Date());
+}
 
   /* Optional vault name */
   const vault = "Main";
 
   /* Optional folder name such as "Clippings/" */
-  const folder = "Inbox/Capture/";
+  const folder = "References/Capture/";
 
   /* Optional tags */
   var tagLines = ['tags:'];
   tagLines.push('  - AI');  // The initial "AI" tag
+  tagLines.push('  - active');  // The initial "AI" tag
 
   /* Parse the site's meta keywords content into tags, if present --> from experience it's not so interesting so commenting*/
   if (document.querySelector('meta[name="keywords" i]')) {
@@ -76,7 +118,12 @@ javascript: (async () => {
     return text.replace(regex, "[![]($1)]($2)");
   }
  
-  const fileName = getFileName(sanitizedTitle);
+
+  // Modified to include date in filename
+  const sanitizedTitleForFile = getFileName(sanitizedTitle);
+  const today = convertDate(new Date());
+  const fileName = `${today}-${sanitizedTitleForFile}`;
+
 
   if (selection) {
       var markdownify = selection;
@@ -100,18 +147,17 @@ javascript: (async () => {
 
   const markdownBody = fixMarkdownLinks(markdownBodyTemp);
 
-  var date = new Date();
-
   function convertDate(date) {
     var yyyy = date.getFullYear().toString();
-    var mm = (date.getMonth()+1).toString();
-    var dd  = date.getDate().toString();
+    var mm = (date.getMonth() + 1).toString();
+    var dd = date.getDate().toString();
     var mmChars = mm.split('');
     var ddChars = dd.split('');
-    return yyyy + '-' + (mmChars[1]?mm:"0"+mmChars[0]) + '-' + (ddChars[1]?dd:"0"+ddChars[0]);
-  }
+    return yyyy + '-' + (mmChars[1] ? mm : "0" + mmChars[0]) + '-' + (ddChars[1] ? dd : "0" + ddChars[0]);
+}
 
-  const today = convertDate(date);
+    const publicationDate = getPublicationDate();
+
 
   // Utility function to get meta content by name or property
   function getMetaContent(attr, value) {
@@ -129,22 +175,23 @@ javascript: (async () => {
   var desc = getMetaContent("name", "description") || getMetaContent("property", "description") ||  getMetaContent("property", "og:description"); ; 
   const sanitizedDesc = sanitizeYAMLstring(desc)
 
-  /* YAML front matter as tags render cleaner with special chars  */
-  const fileContent = 
-      '---\n'
-      + 'category: "[[Clippings]]"\n'
-      + 'author: ' + authorBrackets + '\n'
-      + 'title: "' + sanitizedTitle + '"\n'
-      + 'source: ' + document.URL + '\n'
-      + 'clipped: ' + today + '\n'
-      + 'description: "' + sanitizedDesc + '"\n'
-      + 'summary: "' + '"\n'
-      + tagsYAML + '\n'  // Include the tags in the new format
-      + "publish: false\n"
-      + '---\n\n'
-      + "# "+ fileName +'"\n'
-      + markdownBody ;
-
+  /* YAML front matter as tags render cleaner with special chars */
+  const fileContent =
+  '---\n' +
+  'id: "' + generateUUID() + '"\n' +
+  'title: "' + sanitizedTitle + '"\n' +
+  'author: ' + authorBrackets + '\n' +
+  tagsYAML + '\n' +
+  'created_date: ' + today + '\n' +
+  'modified_date: ' + today + '\n' +
+  'source: ' + document.URL + '\n' +
+  'source_date: ' + publicationDate + '\n' +
+  'source_title: "' + sanitizedTitle + '"\n' +
+  'source_description: "' + sanitizedDesc + '"\n' +
+  '---\n\n' +
+  "# " + sanitizedTitle + '\n' +
+  markdownBody;
+  
    document.location.href = "obsidian://new?"
     + "file=" + encodeURIComponent(folder + fileName)
     + "&content=" + encodeURIComponent(fileContent)
