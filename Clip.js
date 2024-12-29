@@ -6,6 +6,117 @@ javascript: (async () => {
 
     const Readability = readabilityModule.Readability;
 
+    // Enhanced HTML cleanup before processing
+    function cleanupHTML(html) {
+        const div = document.createElement('div');
+        div.innerHTML = html;
+
+        // Remove unwanted elements
+        const selectorsToRemove = [
+            'script',
+            'style',
+            'iframe',
+            'nav',
+            'footer',
+            '.advertisement',
+            '.social-share',
+            '.comments',
+            '[role="complementary"]',
+            '.sidebar'
+        ];
+        selectorsToRemove.forEach(selector => {
+            div.querySelectorAll(selector).forEach(el => el.remove());
+        });
+
+        // Fix relative URLs in images and links
+        const baseURL = new URL(document.URL);
+        div.querySelectorAll('img').forEach(img => {
+            if (img.src) {
+                try {
+                    img.src = new URL(img.src, baseURL).href;
+                } catch (e) {
+                    console.log('Error processing image URL:', e);
+                }
+            }
+        });
+
+        div.querySelectorAll('a').forEach(a => {
+            if (a.href) {
+                try {
+                    a.href = new URL(a.href, baseURL).href;
+                } catch (e) {
+                    console.log('Error processing link URL:', e);
+                }
+            }
+        });
+
+        // Preserve code blocks formatting
+        div.querySelectorAll('pre, code').forEach(block => {
+            block.innerHTML = block.innerHTML.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        });
+
+        return div.innerHTML;
+    }
+
+    // Enhanced Turndown configuration
+    function createTurndownService() {
+        const service = new Turndown({
+            headingStyle: 'atx',
+            hr: '---',
+            bulletListMarker: '-',
+            codeBlockStyle: 'fenced',
+            emDelimiter: '*',
+            fence: '```',
+            linkStyle: 'referenced',
+        });
+
+        // Preserve HTML tables
+        service.keep(['table', 'tr', 'td', 'th', 'thead', 'tbody']);
+
+        // Better handling of code blocks
+        service.addRule('fencedCodeBlock', {
+            filter: ['pre', 'code'],
+            replacement: function(content, node) {
+                const language = node.getAttribute('class') || '';
+                const match = language.match(/language-(\w+)/);
+                const lang = match ? match[1] : '';
+                return '\n```' + lang + '\n' + content.trim() + '\n```\n';
+            }
+        });
+
+        // Preserve line breaks in lists and paragraphs
+        service.addRule('lineBreaks', {
+            filter: ['br'],
+            replacement: function() {
+                return '  \n';
+            }
+        });
+
+        // Better handling of blockquotes
+        service.addRule('blockquotes', {
+            filter: 'blockquote',
+            replacement: function(content) {
+                content = content.replace(/^\n+|\n+$/g, '');
+                content = content.replace(/^/gm, '> ');
+                return '\n\n' + content + '\n\n';
+            }
+        });
+
+        // Improved image handling
+        service.addRule('images', {
+            filter: 'img',
+            replacement: function(content, node) {
+                const alt = node.alt || '';
+                const src = node.getAttribute('src') || '';
+                const title = node.title || '';
+                const titlePart = title ? ` "${title}"` : '';
+                return src ? `![${alt}](${src}${titlePart})` : '';
+            }
+        });
+
+        return service;
+    }
+
     // UUID Generation function
     function generateUUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -71,7 +182,8 @@ javascript: (async () => {
 
   const tagsYAML = tagLines.join('\n');  // Join each line into a single string
 
-  function getSelectionHtml() {
+// Enhanced selection capture
+function getSelectionHtml() {
     var html = "";
     if (typeof window.getSelection != "undefined") {
         var sel = window.getSelection();
@@ -87,16 +199,23 @@ javascript: (async () => {
             html = document.selection.createRange().htmlText;
         }
     }
-    return html;
-  }
+    return cleanupHTML(html); // Clean the HTML before processing
+}
 
-  const selection = getSelectionHtml();
+const selection = getSelectionHtml();
 
-  const {
-      title,
-      byline,
-      content
-  } = new Readability(document.cloneNode(true)).parse();
+// Enhanced Readability options
+const readabilityOptions = {
+    charThreshold: 20,
+    classesToPreserve: ['code', 'pre', 'table'],
+};
+
+const {
+    title,
+    byline,
+    content
+} = new Readability(document.cloneNode(true), readabilityOptions).parse();
+
 
   function sanitizeYAMLstring(str) {
     return str.replace(/["'“”‘’]/g, '');
@@ -125,11 +244,14 @@ javascript: (async () => {
   const fileName = `${today}-${sanitizedTitleForFile}`;
 
 
-  if (selection) {
-      var markdownify = selection;
-  } else {
-      var markdownify = content;
-  }
+    if (selection) {
+        var markdownify = selection;
+    } else {
+        var markdownify = cleanupHTML(content); // Clean the HTML before processing
+    }
+
+    const turndownService = createTurndownService();
+    const markdownBody = turndownService.turndown(markdownify);
 
   if (vault) {
       var vaultName = '&vault=' + encodeURIComponent(`${vault}`);
@@ -137,15 +259,6 @@ javascript: (async () => {
       var vaultName = '';
   }
 
-  const markdownBodyTemp = new Turndown({
-      headingStyle: 'atx',
-      hr: '---',
-      bulletListMarker: '-',
-      codeBlockStyle: 'fenced',
-      emDelimiter: '*',
-  }).turndown(markdownify);
-
-  const markdownBody = fixMarkdownLinks(markdownBodyTemp);
 
   function convertDate(date) {
     var yyyy = date.getFullYear().toString();
