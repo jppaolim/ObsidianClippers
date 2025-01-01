@@ -96,7 +96,7 @@ javascript: (async () => {
 
       if (!response.ok) {
         throw new Error(
-          `Jina API request failed with status ${response.status}`
+          `Jina API request  failed with status ${response.status}`
         );
       }
 
